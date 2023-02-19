@@ -71,6 +71,12 @@ public class View {
 
     public static void parsePlaylists(String body) {
 
+        if (Objects.equals(Controller.CATEGORY, "featured-playlists")) {
+            featuredList.clear();
+        } else {
+            playlistsList.clear();
+        }
+
         JsonObject test = JsonParser.parseString(body).getAsJsonObject().get("playlists").getAsJsonObject();
         JsonArray items = test.get("items").getAsJsonArray();
 
@@ -103,16 +109,22 @@ public class View {
                 listCounterMin = 0;
                 listCounterMax = Main.instancesPerPage;
             } else if (Objects.equals(argument, "next")) {
-                pageCounter++;
-                listCounterMin += Main.instancesPerPage;
-                listCounterMax += Main.instancesPerPage;
-                if (maxPageCounter * Main.instancesPerPage > list.size()) {
-                    listCounterMax = newList.size();
+                if (listCounterMax + Main.instancesPerPage > list.size()) {
+                    listCounterMax = list.size();
+                } else {
+                    listCounterMax += Main.instancesPerPage;
                 }
+                listCounterMin += Main.instancesPerPage;
+                pageCounter++;
             } else {
+                if (listCounterMax == list.size()) {
+                    listCounterMax = maxPageCounter * Main.instancesPerPage - Main.instancesPerPage;
+                    listCounterMin = listCounterMax - 5;
+                } else {
+                    listCounterMin -= Main.instancesPerPage;
+                    listCounterMax -= Main.instancesPerPage;
+                }
                 pageCounter--;
-                listCounterMin -= Main.instancesPerPage;
-                listCounterMax -= Main.instancesPerPage;
             }
 
             for (int i = listCounterMin; i < listCounterMax; i++) {
